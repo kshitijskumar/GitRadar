@@ -10,7 +10,7 @@ import org.example.project.serialization.AppJson
 
 internal fun HttpClientConfig<*>.installGithubDefaults() {
     install(ContentNegotiation) {
-        json(AppJson.instance)
+        json(AppJson)
     }
 
     defaultRequest {
