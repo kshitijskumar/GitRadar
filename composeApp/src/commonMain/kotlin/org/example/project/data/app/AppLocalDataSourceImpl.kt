@@ -16,40 +16,26 @@ import org.example.project.data.github.model.PullRequestResponseApiModel
 import org.example.project.data.github.model.toDomain
 import org.example.project.data.model.LoggedInUser
 import org.example.project.data.model.PullRequest
+import org.example.project.serialization.AppJson
+import org.example.project.serialization.decodeFromStringSafely
 
 class AppLocalDataSourceImpl(
     private val preferencesDataStore: DataStore<Preferences>
 ) : AppLocalDataSource {
-    private val repositoryLinkKey = stringPreferencesKey("repository_link")
-    private val accessTokenKey = stringPreferencesKey("access_token")
-    private val githubUsernameKey = stringPreferencesKey("github_username")
+    private val userDetailKey = stringPreferencesKey("user_details")
 
     override fun observeLoggedInUser(): Flow<LoggedInUser?> =
         preferencesDataStore.data.map { prefs ->
-            val repo = prefs[repositoryLinkKey]
-            val token = prefs[accessTokenKey]
-            val username = prefs[githubUsernameKey]
-            if (repo.isNullOrBlank() || token.isNullOrBlank() || username.isNullOrBlank()) {
-                null
-            } else {
-                LoggedInUser(
-                    repositoryLink = repo,
-                    accessToken = token,
-                    githubUsername = username,
-                )
-            }
+            val userString = prefs[userDetailKey] ?: ""
+            AppJson.decodeFromStringSafely<LoggedInUser>(userString)
         }
 
     override suspend fun setLoggedInUser(user: LoggedInUser?) {
         preferencesDataStore.edit { prefs ->
             if (user == null) {
-                prefs.remove(repositoryLinkKey)
-                prefs.remove(accessTokenKey)
-                prefs.remove(githubUsernameKey)
+                prefs.remove(userDetailKey)
             } else {
-                prefs[repositoryLinkKey] = user.repositoryLink
-                prefs[accessTokenKey] = user.accessToken
-                prefs[githubUsernameKey] = user.githubUsername
+                prefs[userDetailKey] = AppJson.encodeToString(user)
             }
         }
     }

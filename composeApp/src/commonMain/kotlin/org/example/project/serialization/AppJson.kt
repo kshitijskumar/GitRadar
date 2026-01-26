@@ -12,3 +12,11 @@ val AppJson = Json {
     encodeDefaults = true
 }
 
+inline fun <reified T>Json.decodeFromStringSafely(data: String): T? {
+    return try {
+        this.decodeFromString<T>(data)
+    } catch (e: Exception) {
+        null
+    }
+}
+
