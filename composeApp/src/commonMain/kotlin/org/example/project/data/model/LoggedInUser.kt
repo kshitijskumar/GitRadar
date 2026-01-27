@@ -43,7 +43,7 @@ data class LoggedInUser(
         return GithubRepoRef(owner = owner, repo = repo)
     }
 
-    private companion object {
+    companion object {
         private val ownerRepoRegex = Regex("""^[A-Za-z0-9_.-]+$""")
     }
 }

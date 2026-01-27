@@ -14,6 +14,8 @@ import org.example.project.screens.app.AppManagerViewModel
 import org.example.project.screens.app.AppScreenType
 import org.example.project.data.app.AppLocalDataSource
 import org.example.project.data.app.AppLocalDataSourceImpl
+import org.example.project.screens.login.LoginScreen
+import org.example.project.screens.login.LoginViewModel
 import org.example.project.data.local.createUserDataStore
 import org.example.project.util.PlatformContext
 
@@ -25,14 +27,15 @@ fun App(
         val localDataSource: AppLocalDataSource = remember(platformContext) {
             AppLocalDataSourceImpl(createUserDataStore(platformContext))
         }
-        val viewModel = remember(localDataSource) { AppManagerViewModel(localDataSource) }
+        val appManagerViewModel = remember(localDataSource) { AppManagerViewModel(localDataSource) }
+        val loginViewModel = remember(localDataSource) { LoginViewModel(localDataSource) }
 
-        val state by viewModel.state.collectAsState()
+        val state by appManagerViewModel.state.collectAsState()
 
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             when (state.screenType) {
                 null -> Text("Loading…")
-                AppScreenType.LOGIN -> Text("Login")
+                AppScreenType.LOGIN -> LoginScreen(viewModel = loginViewModel)
                 AppScreenType.DASHBOARD -> Text("Dashboard")
             }
         }

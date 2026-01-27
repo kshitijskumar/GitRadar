@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.project.data.app.AppLocalDataSource
 import org.example.project.data.model.LoggedInUser
+import org.example.project.screens.base.SnackbarErrorMessage
 
 class LoginViewModel(
     private val localDataSource: AppLocalDataSource,
@@ -30,12 +31,21 @@ class LoginViewModel(
     }
 
     fun handleProceedClicked() {
+        if (state.value.isLoading) {
+            return
+        }
+        _state.update { it.copy(isLoading = true) }
         val repoLink = state.value.githubRepositoryLink.trim()
         val username = state.value.githubUsername.trim()
         val token = state.value.githubToken.trim()
 
         if (repoLink.isEmpty() || username.isEmpty() || token.isEmpty()) {
-            _state.update { it.copy(errorMessage = "Please fill repository, username and token.") }
+            _state.update {
+                it.copy(
+                    errorMessage = SnackbarErrorMessage("Please fill repository, username and token."),
+                    isLoading = false
+                )
+            }
             return
         }
 
@@ -47,7 +57,10 @@ class LoginViewModel(
 
         if (user.githubRepoRef == null) {
             _state.update {
-                it.copy(errorMessage = "Invalid repository link. Expected a GitHub repo URL like github.com/<owner>/<repo>.")
+                it.copy(
+                    errorMessage = SnackbarErrorMessage("Invalid repository link. Expected a GitHub repo URL like github.com/<owner>/<repo>."),
+                    isLoading = false
+                )
             }
             return
         }
@@ -55,11 +68,19 @@ class LoginViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null) }
             runCatching { localDataSource.setLoggedInUser(user) }
+                .onSuccess {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = null,
+                        )
+                    }
+                }
                 .onFailure { e ->
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = e.message ?: "Failed to save user",
+                            errorMessage = SnackbarErrorMessage(e.message ?: "Failed to save user"),
                         )
                     }
                 }

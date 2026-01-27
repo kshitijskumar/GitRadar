@@ -20,7 +20,7 @@ class AppRemoteDataSourceImpl(
         page: Int,
         perPage: Int
     ): List<PullRequest> {
-        val repoRef = user.githubRepoRef
+        val repoRef = user.githubRepoRef ?: return emptyList()
 
         val prs: List<PullRequestResponseApiModel> =
             githubClient.get("repos/${repoRef.owner}/${repoRef.repo}/pulls") {

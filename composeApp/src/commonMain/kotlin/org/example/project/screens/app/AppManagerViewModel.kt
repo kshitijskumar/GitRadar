@@ -65,7 +65,7 @@ class AppManagerViewModel(
     private fun resolveScreenType(userInfo: LoggedInUser?): AppScreenType {
         return when(val currentScreenType = state.value.screenType) {
             AppScreenType.LOGIN,
-            AppScreenType.DASHBOARD -> if (userInfo == null) currentScreenType else AppScreenType.LOGIN
+            AppScreenType.DASHBOARD -> if (userInfo == null) currentScreenType else AppScreenType.DASHBOARD
             null -> AppScreenType.LOGIN
         }
     }
