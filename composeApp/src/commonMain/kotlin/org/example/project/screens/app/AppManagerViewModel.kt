@@ -66,7 +66,7 @@ class AppManagerViewModel(
         return when(val currentScreenType = state.value.screenType) {
             AppScreenType.LOGIN,
             AppScreenType.DASHBOARD -> if (userInfo == null) currentScreenType else AppScreenType.DASHBOARD
-            null -> AppScreenType.LOGIN
+            null -> if (userInfo == null) AppScreenType.LOGIN else AppScreenType.DASHBOARD
         }
     }
 
