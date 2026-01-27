@@ -2,10 +2,6 @@ package org.example.project.screens.app
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,7 +51,7 @@ class AppManagerViewModel(
                 .collect()
         }
     }
-    
+
     fun acknowledgeSessionClearance() {
         _state.update { 
             it.copy(
@@ -65,7 +61,7 @@ class AppManagerViewModel(
             )
         }
     }
-    
+
     private fun resolveScreenType(userInfo: LoggedInUser?): AppScreenType {
         return when(val currentScreenType = state.value.screenType) {
             AppScreenType.LOGIN,
