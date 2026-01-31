@@ -60,6 +60,7 @@ class DashboardViewModel(
                                 DashboardPullRequestItem(
                                     title = pr.title,
                                     authorLogin = pr.user.login,
+                                    browserUrl = pr.htmlUrl,
                                 )
                             }
                         )
@@ -75,6 +76,7 @@ class DashboardViewModel(
                                 DashboardPullRequestItem(
                                     title = pr.title,
                                     authorLogin = pr.user.login,
+                                    browserUrl = pr.htmlUrl,
                                 )
                             }
                         )

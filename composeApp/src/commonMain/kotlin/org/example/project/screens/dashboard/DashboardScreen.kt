@@ -1,8 +1,10 @@
 package org.example.project.screens.dashboard
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,6 +40,7 @@ fun DashboardScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val uriHandler = LocalUriHandler.current
 
     LaunchedEffect(state.errorMessage) {
         state.errorMessage?.let { snackbarHostState.showSnackbar(it.msg) }
@@ -73,11 +77,11 @@ fun DashboardScreen(
                 selectedTabIndex = state.selectedTab.ordinal,
             ) {
                 Tab(
-                    selected = state.selectedTab == DashboardTab.MY_PRS,
-                    onClick = { viewModel.handleTabSelected(DashboardTab.MY_PRS) },
+                    selected = state.selectedTab == DashboardTab.PR_REVIEWS,
+                    onClick = { viewModel.handleTabSelected(DashboardTab.PR_REVIEWS) },
                     text = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("My PRs")
+                            Text("PR Reviews")
                             if (state.isPullRequestsLoading) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.padding(start = 8.dp),
@@ -87,12 +91,13 @@ fun DashboardScreen(
                         }
                     },
                 )
+
                 Tab(
-                    selected = state.selectedTab == DashboardTab.PR_REVIEWS,
-                    onClick = { viewModel.handleTabSelected(DashboardTab.PR_REVIEWS) },
+                    selected = state.selectedTab == DashboardTab.MY_PRS,
+                    onClick = { viewModel.handleTabSelected(DashboardTab.MY_PRS) },
                     text = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("PR Reviews")
+                            Text("My PRs")
                             if (state.isPullRequestsLoading) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.padding(start = 8.dp),
@@ -116,7 +121,14 @@ fun DashboardScreen(
                     .padding(16.dp),
             ) {
                 items(items) { pr ->
-                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(enabled = pr.browserUrl.isNotBlank()) {
+                                uriHandler.openUri(pr.browserUrl)
+                            }
+                            .padding(vertical = 8.dp)
+                    ) {
                         Text(pr.title)
                         Text("by ${pr.authorLogin}")
                     }

@@ -21,6 +21,7 @@ enum class DashboardTab {
 data class DashboardPullRequestItem(
     val title: String,
     val authorLogin: String,
+    val browserUrl: String,
 )
 
 sealed class DashboardDialogType {
