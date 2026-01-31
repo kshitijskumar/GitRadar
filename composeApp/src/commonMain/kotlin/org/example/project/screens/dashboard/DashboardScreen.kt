@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.example.project.data.theme.AppColors
 import org.example.project.data.theme.AppTheme
 
@@ -65,12 +66,15 @@ fun DashboardScreen(
                 shadowElevation = 0.dp,
             ) {
                 TopAppBar(
-                    title = { Text(
-                        text = state.title,
-                        color = AppTheme.color.primaryText,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    ) },
+                    title = {
+                        Text(
+                            text = state.title,
+                            color = AppTheme.color.primaryText,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            fontSize = 16.sp
+                        )
+                    },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = AppTheme.color.surfaceColor,
                         titleContentColor = AppTheme.color.surfaceColor
