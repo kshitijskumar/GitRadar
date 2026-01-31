@@ -1,11 +1,13 @@
 package org.example.project.screens.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -38,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -176,7 +179,6 @@ fun DashboardScreen(
                                     modifier = Modifier
                                         .size(12.dp)
                                         .background(pr.status.indicatorColor(), shape = RoundedCornerShape(12.dp))
-                                        .clickable { viewModel.markUnmarkResolved(pr) }
                                 )
                                 Text(
                                     modifier = Modifier.padding(start = 16.dp),
@@ -186,10 +188,41 @@ fun DashboardScreen(
                                     overflow = TextOverflow.Ellipsis
                                 )
                             }
-                            Text(
-                                text = "by ${pr.authorLogin}",
-                                color = AppTheme.color.secondaryText
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "by ${pr.authorLogin}",
+                                    color = AppTheme.color.secondaryText
+                                )
+
+                                Spacer(Modifier.weight(1f))
+
+                                if (pr.status.showResolveOption()) {
+                                    Text(
+                                        text = when(pr.status) {
+                                            PullRequestStatus.DRAFT -> "" // draft should get filter out from above
+                                            PullRequestStatus.NEEDS_ATTENTION -> "Resolve"
+                                            PullRequestStatus.RESOLVED -> "Unresolve"
+                                        },
+                                        color = AppTheme.color.disabledText,
+                                        fontSize = 12.sp,
+                                        modifier = Modifier
+                                            .border(
+                                                width = 2.dp,
+                                                color = AppTheme.color.disabledText,
+                                                shape = RoundedCornerShape(4.dp)
+                                            )
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .clickable { viewModel.markUnmarkResolved(pr) }
+                                            .padding(
+                                                horizontal = 8.dp,
+                                                vertical = 4.dp
+                                            )
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -227,6 +260,14 @@ fun DashboardScreen(
             )
         }
         null -> {}
+    }
+}
+
+private fun PullRequestStatus.showResolveOption(): Boolean {
+    return when(this) {
+        PullRequestStatus.DRAFT -> false
+        PullRequestStatus.NEEDS_ATTENTION,
+        PullRequestStatus.RESOLVED -> true
     }
 }
 
