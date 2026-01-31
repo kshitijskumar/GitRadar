@@ -117,8 +117,25 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "org.example.project"
+
+            modules(
+                "java.sql",
+                "java.naming",
+                "java.logging",
+                "java.xml",
+
+                // REQUIRED for DataStore / atomicfu
+                "jdk.unsupported"
+            )
+
+            packageName = "GitRadar"
             packageVersion = "1.0.0"
+
+            macOS {
+                iconFile.set(
+                    project.file("src/jvmMain/resources/AppIcon.icns")
+                )
+            }
         }
     }
 }

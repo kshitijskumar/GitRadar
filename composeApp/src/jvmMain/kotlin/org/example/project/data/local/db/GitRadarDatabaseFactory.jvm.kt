@@ -6,7 +6,10 @@ import org.example.project.util.PlatformContext
 import java.io.File
 
 actual fun createGitRadarSqlDriver(platformContext: PlatformContext): SqlDriver {
-    val dbFile = File("gitradar.db")
+    val home = System.getProperty("user.home")
+    val fileName = "gitradar.db"
+    val filePath = "$home/Library/Application Support/$fileName"
+    val dbFile = File(filePath)
     val isNew = !dbFile.exists()
     val driver = JdbcSqliteDriver("jdbc:sqlite:${dbFile.absolutePath}")
 
