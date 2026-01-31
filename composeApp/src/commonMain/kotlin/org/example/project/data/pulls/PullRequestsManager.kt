@@ -4,10 +4,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import org.example.project.data.app.AppLocalDataSource
 import org.example.project.data.app.AppRemoteDataSource
 import org.example.project.data.github.model.PullRequestResponseDocApiModel
+import org.example.project.screens.dashboard.PullRequestStatus
 
 class PullRequestsManager(
     private val localDataSource: AppLocalDataSource,
@@ -34,7 +36,7 @@ class PullRequestsManager(
     /**
      * PRs authored by the currently logged-in user (`LoggedInUser.githubUsername`).
      */
-    fun currentUsersPullRequests(): Flow<List<PullRequestResponseDocApiModel>> =
+    fun currentUsersPullRequests(): Flow<List<PullRequestAppModel>> =
         combine(
             localDataSource.observeLoggedInUser(),
             _pullRequests.asStateFlow(),
@@ -43,13 +45,21 @@ class PullRequestsManager(
             if (me.isNullOrBlank()) return@combine emptyList()
             prs.filter { it.user.login == me }
         }
+            .map { list ->
+                list.map {
+                    PullRequestAppModel(
+                        pr = it,
+                        status = resolvePRStatus(it)
+                    )
+                }
+            }
 
     /**
      * PRs where the currently logged-in user is either:
      * - in `assignees`, OR
      * - in `requested_reviewers`
      */
-    fun pullRequestsForReview(): Flow<List<PullRequestResponseDocApiModel>> =
+    fun pullRequestsForReview(): Flow<List<PullRequestAppModel>> =
         combine(
             localDataSource.observeLoggedInUser(),
             _pullRequests.asStateFlow(),
@@ -62,6 +72,20 @@ class PullRequestsManager(
                     pr.requestedReviewers.any { it.login == me }
             }
         }
+            .map { list ->
+                list.map {
+                    PullRequestAppModel(
+                        pr = it,
+                        status = resolvePRStatus(it)
+                    )
+                }
+            }
+
+    private fun resolvePRStatus(
+        pr: PullRequestResponseDocApiModel
+    ): PullRequestStatus {
+        return if (pr.draft) PullRequestStatus.DRAFT else PullRequestStatus.NEEDS_ATTENTION
+    }
 
     fun clear() {
         _pullRequests.update { listOf() }

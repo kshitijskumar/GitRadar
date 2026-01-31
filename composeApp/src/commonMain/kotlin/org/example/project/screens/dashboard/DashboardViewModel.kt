@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.project.data.app.AppLocalDataSource
+import org.example.project.data.pulls.PullRequestAppModel
 import org.example.project.data.pulls.PullRequestsManager
 import org.example.project.screens.base.SnackbarErrorMessage
 
@@ -62,13 +63,7 @@ class DashboardViewModel(
                 pullRequestsManager.currentUsersPullRequests().collect { prs ->
                     _state.update {
                         it.copy(
-                            myPullRequests = prs.map { pr ->
-                                DashboardPullRequestItem(
-                                    title = pr.title,
-                                    authorLogin = pr.user.login,
-                                    browserUrl = pr.htmlUrl,
-                                )
-                            }
+                            myPullRequests = prs.map { pr -> pr.toDashboardItem() }
                         )
                     }
                 }
@@ -78,18 +73,23 @@ class DashboardViewModel(
                 pullRequestsManager.pullRequestsForReview().collect { prs ->
                     _state.update {
                         it.copy(
-                            pullRequestsForReview = prs.map { pr ->
-                                DashboardPullRequestItem(
-                                    title = pr.title,
-                                    authorLogin = pr.user.login,
-                                    browserUrl = pr.htmlUrl,
-                                )
-                            }
+                            pullRequestsForReview = prs.map { pr -> pr.toDashboardItem() }
                         )
                     }
                 }
             }
         }
+    }
+
+    private fun PullRequestAppModel.toDashboardItem(): DashboardPullRequestItem {
+        return DashboardPullRequestItem(
+            prId = this.pr.id,
+            title = this.pr.title,
+            authorLogin = this.pr.user.login,
+            browserUrl = this.pr.htmlUrl,
+            updatedAt = this.pr.updatedAt,
+            status = this.status,
+        )
     }
 
     private fun fetchPullRequests() {

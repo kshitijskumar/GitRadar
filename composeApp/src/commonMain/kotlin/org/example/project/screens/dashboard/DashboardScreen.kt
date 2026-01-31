@@ -3,10 +3,12 @@ package org.example.project.screens.dashboard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -142,7 +144,10 @@ fun DashboardScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(items) { pr ->
+                items(
+                    items = items,
+                    key = { it.prId },
+                ) { pr ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth(),
@@ -163,12 +168,23 @@ fun DashboardScreen(
                                     horizontal = 16.dp
                                 )
                         ) {
-                            Text(
-                                text = pr.title,
-                                color = AppTheme.color.primaryText,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(12.dp)
+                                        .background(pr.status.indicatorColor(), shape = RoundedCornerShape(12.dp))
+                                )
+                                Text(
+                                    modifier = Modifier.padding(start = 16.dp),
+                                    text = pr.title,
+                                    color = AppTheme.color.primaryText,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                             Text(
                                 text = "by ${pr.authorLogin}",
                                 color = AppTheme.color.secondaryText
