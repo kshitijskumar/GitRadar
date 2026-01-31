@@ -1,32 +1,34 @@
 package org.example.project.data.local.db
 
 import app.cash.sqldelight.db.SqlDriver
-import kotlinx.atomicfu.locks.SynchronizedObject
-import kotlinx.atomicfu.locks.synchronized
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.example.project.util.PlatformContext
 import kotlin.concurrent.Volatile
 
 expect fun createGitRadarSqlDriver(platformContext: PlatformContext): SqlDriver
 
-object GitRadarDatabaseFactory: SynchronizedObject() {
+object GitRadarDatabaseFactory {
 
     @Volatile
     private var db: GitRadarDatabase? = null
+    private val mutex = Mutex()
 
-    fun getGitRadarDatabase(platformContext: PlatformContext) : GitRadarDatabase {
+    fun getGitRadarDatabase(platformContext: PlatformContext) : GitRadarDatabase = runBlocking {
         if (db != null) {
-            return db!!
+            return@runBlocking db!!
         }
 
-        return synchronized(this) {
-            var db = this.db
+        return@runBlocking mutex.withLock {
+            var db = this@GitRadarDatabaseFactory.db
             if (db != null) {
-                return@synchronized db
+                return@withLock db
             }
 
             db = createGitRadarDatabase(platformContext)
-            this.db = db
-            return@synchronized db
+            this@GitRadarDatabaseFactory.db = db
+            return@withLock db
         }
     }
 
