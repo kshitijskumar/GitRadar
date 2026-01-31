@@ -48,6 +48,12 @@ class DashboardViewModel(
         _state.update { it.copy(selectedTab = tab) }
     }
 
+    fun handleRefreshClicked() {
+        // UI should disable the button, but keep a guard here too.
+        if (state.value.isPullRequestsLoading) return
+        fetchPullRequests()
+    }
+
     private fun startPullRequestsCollectorsIfNeeded() {
         if (pullRequestsCollectionJob != null) return
 
@@ -138,6 +144,7 @@ class DashboardViewModel(
         pullRequestsCollectionJob?.cancel()
         pullRequestsCollectionJob = null
         _state.update { DashboardState() }
+        pullRequestsManager.clear()
     }
 }
 

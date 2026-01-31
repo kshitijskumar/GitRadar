@@ -62,5 +62,9 @@ class PullRequestsManager(
                     pr.requestedReviewers.any { it.login == me }
             }
         }
+
+    fun clear() {
+        _pullRequests.update { listOf() }
+    }
 }
 

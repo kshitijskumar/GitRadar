@@ -58,6 +58,12 @@ fun DashboardScreen(
                     title = { Text(state.title) },
                     actions = {
                         TextButton(
+                            onClick = viewModel::handleRefreshClicked,
+                            enabled = !state.isPullRequestsLoading,
+                        ) {
+                            Text("Refresh")
+                        }
+                        TextButton(
                             onClick = viewModel::handleLogoutClicked,
                             enabled = !state.isLoading,
                         ) {
@@ -74,39 +80,25 @@ fun DashboardScreen(
                 .padding(padding),
         ) {
             PrimaryTabRow(
-                selectedTabIndex = state.selectedTab.ordinal,
+                selectedTabIndex = state.tabs.indexOf(state.selectedTab).takeIf { it >= 0 } ?: 0,
             ) {
-                Tab(
-                    selected = state.selectedTab == DashboardTab.PR_REVIEWS,
-                    onClick = { viewModel.handleTabSelected(DashboardTab.PR_REVIEWS) },
-                    text = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("PR Reviews")
-                            if (state.isPullRequestsLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.padding(start = 8.dp),
-                                    strokeWidth = 2.dp,
-                                )
+                state.tabs.forEach {
+                    Tab(
+                        selected = state.selectedTab == it,
+                        onClick = { viewModel.handleTabSelected(it) },
+                        text = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(it.tabName())
+                                if (state.isPullRequestsLoading) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.padding(start = 8.dp),
+                                        strokeWidth = 2.dp,
+                                    )
+                                }
                             }
-                        }
-                    },
-                )
-
-                Tab(
-                    selected = state.selectedTab == DashboardTab.MY_PRS,
-                    onClick = { viewModel.handleTabSelected(DashboardTab.MY_PRS) },
-                    text = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("My PRs")
-                            if (state.isPullRequestsLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.padding(start = 8.dp),
-                                    strokeWidth = 2.dp,
-                                )
-                            }
-                        }
-                    },
-                )
+                        },
+                    )
+                }
             }
 
             val items =
