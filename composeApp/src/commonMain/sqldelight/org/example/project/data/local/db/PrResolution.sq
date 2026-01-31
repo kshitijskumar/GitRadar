@@ -9,14 +9,16 @@ CREATE TABLE pr_resolution (
 selectAllData:
 SELECT * FROM pr_resolution WHERE repoOwner = ? AND repoName = ?;
 
+delete:
+DELETE FROM pr_resolution WHERE prId = ?;
+
 selectLastResolvedAtMillis:
 SELECT lastResolvedAtMillis
 FROM pr_resolution
 WHERE repoOwner = ? AND repoName = ? AND prId = ?;
 
 upsertLastResolvedAtMillis:
-INSERT OR REPLACE INTO pr_resolution(repoOwner, repoName, prId, lastResolvedAtMillis)
-VALUES (?, ?, ?, ?);
+INSERT OR REPLACE INTO pr_resolution VALUES ?;
 
 selectAllLastResolvedAtMillisForRepo:
 SELECT prId, lastResolvedAtMillis

@@ -78,5 +78,29 @@ class AppLocalDataSourceImpl(
             .asFlow()
             .mapToList(Dispatchers.IO)
     }
+
+    override suspend fun markResolvedAt(
+        prId: Long,
+        timeInMillis: Long,
+        repoName: String,
+        repoOwner: String
+    ) {
+        withContext(Dispatchers.IO) {
+            database.prResolutionQueries.upsertLastResolvedAtMillis(
+                Pr_resolution(
+                    prId = prId,
+                    lastResolvedAtMillis = timeInMillis,
+                    repoName = repoName,
+                    repoOwner = repoOwner
+                )
+            )
+        }
+    }
+
+    override suspend fun delete(prId: Long) {
+        withContext(Dispatchers.IO) {
+            database.prResolutionQueries.delete(prId)
+        }
+    }
 }
 

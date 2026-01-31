@@ -10,9 +10,11 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.project.data.app.AppLocalDataSource
+import org.example.project.data.github.model.PullRequestResponseDocApiModel
 import org.example.project.data.pulls.PullRequestAppModel
 import org.example.project.data.pulls.PullRequestsManager
 import org.example.project.screens.base.SnackbarErrorMessage
+import kotlin.time.Instant
 
 class DashboardViewModel(
     private val localDataSource: AppLocalDataSource,
@@ -140,11 +142,39 @@ class DashboardViewModel(
         }
     }
 
+    fun markUnmarkResolved(pr: DashboardPullRequestItem) {
+        viewModelScope.launch {
+            when(pr.status) {
+                PullRequestStatus.DRAFT -> {
+                    // no concept of resolved/unresolved from drafts
+                    return@launch
+                }
+                PullRequestStatus.NEEDS_ATTENTION -> {
+                    val instant = Instant.parseOrNull(pr.updatedAt) ?: return@launch
+                    val repo = localDataSource.observeLoggedInUser().firstOrNull()?.githubRepoRef ?: return@launch
+                    localDataSource.markResolvedAt(
+                        prId = pr.prId,
+                        timeInMillis = instant.toEpochMilliseconds(),
+                        repoName = repo.repo,
+                        repoOwner = repo.owner
+                    )
+                }
+                PullRequestStatus.RESOLVED -> {
+                    localDataSource.delete(pr.prId)
+                }
+            }
+        }
+    }
+
     fun resetViewModel() {
         pullRequestsCollectionJob?.cancel()
         pullRequestsCollectionJob = null
         _state.update { DashboardState() }
         pullRequestsManager.clear()
+    }
+
+    companion object {
+        private const val MINUTES_5_IN_MILLIS = 5 * 60 * 1000
     }
 }
 

@@ -21,5 +21,14 @@ interface AppLocalDataSource {
         repoOwner: String,
         repoName: String,
     ): Flow<List<Pr_resolution>>
+
+    suspend fun markResolvedAt(
+        prId: Long,
+        timeInMillis: Long,
+        repoName: String,
+        repoOwner: String
+    )
+
+    suspend fun delete(prId: Long)
 }
 

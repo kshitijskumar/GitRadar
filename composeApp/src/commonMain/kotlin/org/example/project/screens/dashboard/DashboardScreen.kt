@@ -176,6 +176,7 @@ fun DashboardScreen(
                                     modifier = Modifier
                                         .size(12.dp)
                                         .background(pr.status.indicatorColor(), shape = RoundedCornerShape(12.dp))
+                                        .clickable { viewModel.markUnmarkResolved(pr) }
                                 )
                                 Text(
                                     modifier = Modifier.padding(start = 16.dp),

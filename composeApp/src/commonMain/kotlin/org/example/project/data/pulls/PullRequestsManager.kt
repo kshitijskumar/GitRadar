@@ -86,14 +86,7 @@ class PullRequestsManager(
                     pr.requestedReviewers.any { it.login == me }
             }
         }
-            .map { list ->
-                list.map {
-                    PullRequestAppModel(
-                        pr = it,
-                        status = resolvePRStatus(it)
-                    )
-                }
-            }
+            .resolveStatus()
 
     private fun Flow<List<PullRequestResponseDocApiModel>>.resolveStatus(): Flow<List<PullRequestAppModel>> {
         return combine(
