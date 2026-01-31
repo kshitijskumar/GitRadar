@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.project.data.app.AppLocalDataSource
 import org.example.project.data.model.LoggedInUser
+import org.example.project.data.model.RecentLogin
 import org.example.project.screens.base.SnackbarErrorMessage
 
 class LoginViewModel(
@@ -17,6 +19,24 @@ class LoginViewModel(
 
     private val _state = MutableStateFlow(LoginState())
     val state: StateFlow<LoginState> = _state.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            localDataSource.observeRecentLogins().collect { logins ->
+                _state.update {
+                    it.copy(
+                        recentLogins = logins.map { login ->
+                            LoginQuickLoginItem(
+                                repositoryLink = login.repositoryLink,
+                                githubUsername = login.githubUsername,
+                                repoDisplayText = buildRepoDisplayText(login),
+                            )
+                        }
+                    )
+                }
+            }
+        }
+    }
 
     fun handleGithubRepositoryEntered(value: String) {
         _state.update { it.copy(githubRepositoryLink = value, errorMessage = null) }
@@ -28,6 +48,17 @@ class LoginViewModel(
 
     fun handleGithubTokenEntered(value: String) {
         _state.update { it.copy(githubToken = value, errorMessage = null) }
+    }
+
+    fun handleQuickLoginClicked(item: LoginQuickLoginItem) {
+        _state.update {
+            it.copy(
+                githubRepositoryLink = item.repositoryLink,
+                githubUsername = item.githubUsername,
+                githubToken = "",
+                errorMessage = null,
+            )
+        }
     }
 
     fun handleProceedClicked() {
@@ -69,6 +100,14 @@ class LoginViewModel(
             _state.update { it.copy(isLoading = true, errorMessage = null) }
             runCatching { localDataSource.setLoggedInUser(user) }
                 .onSuccess {
+                    runCatching {
+                        localDataSource.addRecentLogin(
+                            RecentLogin(
+                                repositoryLink = repoLink,
+                                githubUsername = username,
+                            )
+                        )
+                    }
                     _state.update {
                         it.copy(
                             isLoading = false,
@@ -89,6 +128,20 @@ class LoginViewModel(
 
     fun resetViewModel() {
         _state.update { LoginState() }
+    }
+}
+
+private fun buildRepoDisplayText(login: RecentLogin): String {
+    val parsed = LoggedInUser(
+        repositoryLink = login.repositoryLink,
+        accessToken = "",
+        githubUsername = login.githubUsername,
+    ).githubRepoRef
+
+    return if (parsed != null) {
+        "${parsed.owner}/${parsed.repo}"
+    } else {
+        login.repositoryLink
     }
 }
 

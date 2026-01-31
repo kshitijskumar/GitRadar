@@ -2,7 +2,7 @@ package org.example.project.data.app
 
 import kotlinx.coroutines.flow.Flow
 import org.example.project.data.model.LoggedInUser
-import org.example.project.data.model.PullRequest
+import org.example.project.data.model.RecentLogin
 
 /**
  * Single app data source:
@@ -12,5 +12,8 @@ import org.example.project.data.model.PullRequest
 interface AppLocalDataSource {
     fun observeLoggedInUser(): Flow<LoggedInUser?>
     suspend fun setLoggedInUser(user: LoggedInUser?)
+
+    fun observeRecentLogins(): Flow<List<RecentLogin>>
+    suspend fun addRecentLogin(login: RecentLogin)
 }
 
