@@ -1,0 +1,25 @@
+CREATE TABLE pr_resolution (
+  repoOwner TEXT NOT NULL,
+  repoName TEXT NOT NULL,
+  prId INTEGER NOT NULL,
+  lastResolvedAtMillis INTEGER NOT NULL,
+  PRIMARY KEY (repoOwner, repoName, prId)
+);
+
+selectAllData:
+SELECT * FROM pr_resolution WHERE repoOwner = ? AND repoName = ?;
+
+selectLastResolvedAtMillis:
+SELECT lastResolvedAtMillis
+FROM pr_resolution
+WHERE repoOwner = ? AND repoName = ? AND prId = ?;
+
+upsertLastResolvedAtMillis:
+INSERT OR REPLACE INTO pr_resolution(repoOwner, repoName, prId, lastResolvedAtMillis)
+VALUES (?, ?, ?, ?);
+
+selectAllLastResolvedAtMillisForRepo:
+SELECT prId, lastResolvedAtMillis
+FROM pr_resolution
+WHERE repoOwner = ? AND repoName = ?;
+

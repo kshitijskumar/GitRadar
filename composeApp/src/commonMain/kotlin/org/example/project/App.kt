@@ -28,6 +28,7 @@ import org.example.project.screens.login.LoginViewModel
 import org.example.project.screens.dashboard.DashboardScreen
 import org.example.project.screens.dashboard.DashboardViewModel
 import org.example.project.data.local.createUserDataStore
+import org.example.project.data.local.db.GitRadarDatabaseFactory
 import org.example.project.data.theme.AppColors
 import org.example.project.data.theme.AppTheme
 import org.example.project.screens.app.AppManagerDialogType
@@ -38,8 +39,12 @@ fun App(
     platformContext: PlatformContext,
 ) {
     MaterialTheme {
+        val database = remember(platformContext) { GitRadarDatabaseFactory.getGitRadarDatabase(platformContext) }
         val localDataSource: AppLocalDataSource = remember(platformContext) {
-            AppLocalDataSourceImpl(createUserDataStore(platformContext))
+            AppLocalDataSourceImpl(
+                preferencesDataStore = createUserDataStore(platformContext),
+                database = database,
+            )
         }
         val remoteDataSource: AppRemoteDataSource = remember(localDataSource) {
             AppRemoteDataSourceImpl(

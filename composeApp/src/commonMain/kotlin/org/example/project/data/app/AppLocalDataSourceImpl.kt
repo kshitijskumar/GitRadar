@@ -4,15 +4,23 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import org.example.project.data.local.db.GitRadarDatabase
+import org.example.project.data.local.db.Pr_resolution
 import org.example.project.data.model.LoggedInUser
 import org.example.project.data.model.RecentLogin
 import org.example.project.serialization.AppJson
 import org.example.project.serialization.decodeFromStringSafely
 
 class AppLocalDataSourceImpl(
-    private val preferencesDataStore: DataStore<Preferences>
+    private val preferencesDataStore: DataStore<Preferences>,
+    private val database: GitRadarDatabase,
 ) : AppLocalDataSource {
     private val userDetailKey = stringPreferencesKey("user_details")
     private val recentLoginsKey = stringPreferencesKey("recent_logins")
@@ -56,6 +64,19 @@ class AppLocalDataSourceImpl(
 
             prefs[recentLoginsKey] = AppJson.encodeToString(updated)
         }
+    }
+
+    override fun getAllPullRequestsData(
+        repoOwner: String,
+        repoName: String,
+    ): Flow<List<Pr_resolution>> {
+        return database.prResolutionQueries
+            .selectAllData(
+                repoOwner = repoOwner,
+                repoName = repoName,
+            )
+            .asFlow()
+            .mapToList(Dispatchers.IO)
     }
 }
 

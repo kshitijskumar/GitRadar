@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.sqldelight)
 }
 
 kotlin {
@@ -35,6 +36,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.datastore.preferences.android)
             implementation(libs.ktor.okhttp)
+            implementation(libs.sqldelight.androidDriver)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -51,17 +53,21 @@ kotlin {
             implementation(libs.ktor.core)
             implementation(libs.ktor.contentNegotiation)
             implementation(libs.ktor.serializationKotlinxJson)
+            implementation(libs.sqldelight.runtime)
+            implementation(libs.sqldelight.coroutines.exts)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
         iosMain.dependencies {
             implementation(libs.ktor.darwin)
+            implementation(libs.sqldelight.nativeDriver)
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
             implementation(libs.ktor.cio)
+            implementation(libs.sqldelight.sqliteDriver)
         }
     }
 }
@@ -95,6 +101,14 @@ android {
 
 dependencies {
     debugImplementation(libs.compose.uiTooling)
+}
+
+sqldelight {
+    databases {
+        create("GitRadarDatabase") {
+            packageName.set("org.example.project.data.local.db")
+        }
+    }
 }
 
 compose.desktop {
