@@ -1,19 +1,21 @@
 package org.example.project.data.app
 
-import org.example.project.data.model.LoggedInUser
-import org.example.project.data.model.PullRequest
+import org.example.project.data.github.model.PullRequestResponseDocApiModel
 
 interface AppRemoteDataSource {
 
     /**
-     * Fetches open PRs for the repo derived from the stored [LoggedInUser.repositoryLink].
-     * Uses GitHub REST `GET /repos/{owner}/{repo}/pulls` with `state=open&sort=created&per_page=100`.
+     * Fetches open PRs for the repo derived from the **currently stored** logged-in user.
+     *
+     * Based on `docs/prd/github-apis.md`:
+     * - `GET /repos/{owner}/{repo}/pulls`
+     * - `per_page=100` (max allowed by GitHub)
+     * - `Authorization: Bearer <token>` (from stored user)
+     * - defaults in [createGithubHttpClient] add `Accept` + `X-GitHub-Api-Version` headers
      */
     suspend fun listOpenPullRequests(
-        user: LoggedInUser,
         page: Int = 1,
-        perPage: Int = 100,
-    ): List<PullRequest>
+    ): List<PullRequestResponseDocApiModel>
 
 }
 

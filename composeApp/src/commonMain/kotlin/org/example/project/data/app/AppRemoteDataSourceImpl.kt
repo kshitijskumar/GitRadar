@@ -5,34 +5,31 @@ import io.ktor.client.call.body
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import kotlinx.coroutines.flow.first
-import org.example.project.data.github.model.PullRequestResponseApiModel
-import org.example.project.data.github.model.toDomain
-import org.example.project.data.model.LoggedInUser
-import org.example.project.data.model.PullRequest
+import kotlinx.coroutines.flow.firstOrNull
+import org.example.project.data.github.model.PullRequestResponseDocApiModel
 
 class AppRemoteDataSourceImpl(
-    private val githubClient: HttpClient
+    private val githubClient: HttpClient,
+    private val localDataSource: AppLocalDataSource,
 ) : AppRemoteDataSource {
 
     override suspend fun listOpenPullRequests(
-        user: LoggedInUser,
         page: Int,
-        perPage: Int
-    ): List<PullRequest> {
+    ): List<PullRequestResponseDocApiModel> {
+        val user = localDataSource.observeLoggedInUser().firstOrNull() ?: return emptyList()
         val repoRef = user.githubRepoRef ?: return emptyList()
 
-        val prs: List<PullRequestResponseApiModel> =
+        val prs: List<PullRequestResponseDocApiModel> =
             githubClient.get("repos/${repoRef.owner}/${repoRef.repo}/pulls") {
                 bearerAuth(user.accessToken)
                 parameter("state", "open")
                 parameter("sort", "created")
                 parameter("direction", "desc")
-                parameter("per_page", perPage.coerceIn(1, 100))
+                parameter("per_page", 100)
                 parameter("page", page.coerceAtLeast(1))
             }.body()
 
-        return prs.map { it.toDomain() }
+        return prs
     }
 
 }
