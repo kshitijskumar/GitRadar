@@ -14,6 +14,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.example.project.data.app.AppRemoteDataSource
+import org.example.project.data.app.AppRemoteDataSourceImpl
+import org.example.project.data.github.createGithubHttpClient
+import org.example.project.data.pulls.PullRequestsManager
 import org.example.project.screens.app.AppManagerViewModel
 import org.example.project.screens.app.AppScreenType
 import org.example.project.data.app.AppLocalDataSource
@@ -34,9 +38,26 @@ fun App(
         val localDataSource: AppLocalDataSource = remember(platformContext) {
             AppLocalDataSourceImpl(createUserDataStore(platformContext))
         }
+        val remoteDataSource: AppRemoteDataSource = remember(localDataSource) {
+            AppRemoteDataSourceImpl(
+                githubClient = createGithubHttpClient(),
+                localDataSource = localDataSource,
+            )
+        }
+        val pullRequestsManager = remember(localDataSource, remoteDataSource) {
+            PullRequestsManager(
+                localDataSource = localDataSource,
+                remoteDataSource = remoteDataSource,
+            )
+        }
         val appManagerViewModel = remember(localDataSource) { AppManagerViewModel(localDataSource) }
         val loginViewModel = remember(localDataSource) { LoginViewModel(localDataSource) }
-        val dashboardViewModel = remember(localDataSource) { DashboardViewModel(localDataSource) }
+        val dashboardViewModel = remember(localDataSource, pullRequestsManager) {
+            DashboardViewModel(
+                localDataSource = localDataSource,
+                pullRequestsManager = pullRequestsManager,
+            )
+        }
 
         val state by appManagerViewModel.state.collectAsState()
 

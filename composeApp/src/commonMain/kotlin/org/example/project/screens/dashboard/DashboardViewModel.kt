@@ -2,6 +2,7 @@ package org.example.project.screens.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -9,16 +10,23 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.project.data.app.AppLocalDataSource
+import org.example.project.data.pulls.PullRequestsManager
 import org.example.project.screens.base.SnackbarErrorMessage
 
 class DashboardViewModel(
     private val localDataSource: AppLocalDataSource,
+    private val pullRequestsManager: PullRequestsManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DashboardState())
     val state: StateFlow<DashboardState> = _state.asStateFlow()
 
+    private var pullRequestsCollectionJob: Job? = null
+
     fun initialise() {
+        startPullRequestsCollectorsIfNeeded()
+        fetchPullRequests()
+
         viewModelScope.launch {
             val user = localDataSource.observeLoggedInUser().firstOrNull()
             val repoRef = user?.githubRepoRef
@@ -33,6 +41,61 @@ class DashboardViewModel(
                 }
 
             _state.update { it.copy(title = title) }
+        }
+    }
+
+    fun handleTabSelected(tab: DashboardTab) {
+        _state.update { it.copy(selectedTab = tab) }
+    }
+
+    private fun startPullRequestsCollectorsIfNeeded() {
+        if (pullRequestsCollectionJob != null) return
+
+        pullRequestsCollectionJob = viewModelScope.launch {
+            launch {
+                pullRequestsManager.currentUsersPullRequests().collect { prs ->
+                    _state.update {
+                        it.copy(
+                            myPullRequests = prs.map { pr ->
+                                DashboardPullRequestItem(
+                                    title = pr.title,
+                                    authorLogin = pr.user.login,
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+
+            launch {
+                pullRequestsManager.pullRequestsForReview().collect { prs ->
+                    _state.update {
+                        it.copy(
+                            pullRequestsForReview = prs.map { pr ->
+                                DashboardPullRequestItem(
+                                    title = pr.title,
+                                    authorLogin = pr.user.login,
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun fetchPullRequests() {
+        if (state.value.isPullRequestsLoading) return
+
+        viewModelScope.launch {
+            _state.update { it.copy(isPullRequestsLoading = true, errorMessage = null) }
+            val error = pullRequestsManager.fetchPullRequests()
+            _state.update {
+                it.copy(
+                    isPullRequestsLoading = false,
+                    errorMessage = error?.let { SnackbarErrorMessage(it) },
+                )
+            }
         }
     }
 
@@ -70,6 +133,8 @@ class DashboardViewModel(
     }
 
     fun resetViewModel() {
+        pullRequestsCollectionJob?.cancel()
+        pullRequestsCollectionJob = null
         _state.update { DashboardState() }
     }
 }
