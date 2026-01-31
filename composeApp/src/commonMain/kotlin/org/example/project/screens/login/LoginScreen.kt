@@ -1,19 +1,24 @@
 package org.example.project.screens.login
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -27,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import org.example.project.data.theme.AppTheme
 
 @Composable
 fun LoginScreen(
@@ -41,6 +47,7 @@ fun LoginScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = AppTheme.color.surfaceColor
     ) { padding ->
         Column(
             modifier = Modifier
@@ -60,6 +67,14 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = AppTheme.color.primaryText,
+                    unfocusedTextColor = AppTheme.color.primaryText,
+                    focusedLabelColor = AppTheme.color.secondaryText,
+                    unfocusedLabelColor = AppTheme.color.secondaryText,
+                    focusedContainerColor = AppTheme.color.cardOnSurface,
+                    unfocusedContainerColor = AppTheme.color.cardOnSurface,
+                )
             )
 
             OutlinedTextField(
@@ -70,6 +85,14 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxWidth(0.7f)
                     .padding(bottom = 12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = AppTheme.color.primaryText,
+                    unfocusedTextColor = AppTheme.color.primaryText,
+                    focusedLabelColor = AppTheme.color.secondaryText,
+                    unfocusedLabelColor = AppTheme.color.secondaryText,
+                    focusedContainerColor = AppTheme.color.cardOnSurface,
+                    unfocusedContainerColor = AppTheme.color.cardOnSurface
+                )
             )
 
             OutlinedTextField(
@@ -81,6 +104,14 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxWidth(0.7f)
                     .padding(bottom = 16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = AppTheme.color.primaryText,
+                    unfocusedTextColor = AppTheme.color.primaryText,
+                    focusedLabelColor = AppTheme.color.secondaryText,
+                    unfocusedLabelColor = AppTheme.color.secondaryText,
+                    focusedContainerColor = AppTheme.color.cardOnSurface,
+                    unfocusedContainerColor = AppTheme.color.cardOnSurface
+                )
             )
 
             Button(
@@ -99,13 +130,23 @@ fun LoginScreen(
                 ) {
                     state.recentLogins.forEach { item ->
                         AssistChip(
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = AppTheme.color.cardOnSurface
+                            ),
                             onClick = { viewModel.handleQuickLoginClicked(item) },
                             label = {
-                                Column {
-                                    Text(item.repoDisplayText)
+                                Column(
+                                    modifier = Modifier.padding(8.dp)
+                                ) {
                                     Text(
-                                        item.githubUsername,
+                                        text = item.repoDisplayText,
+                                        color = AppTheme.color.secondaryText
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    Text(
+                                        text = item.githubUsername,
                                         style = MaterialTheme.typography.labelSmall,
+                                        color = AppTheme.color.primaryText
                                     )
                                 }
                             },

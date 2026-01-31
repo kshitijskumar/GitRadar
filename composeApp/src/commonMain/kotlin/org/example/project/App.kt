@@ -1,5 +1,6 @@
 package org.example.project
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
@@ -27,6 +28,8 @@ import org.example.project.screens.login.LoginViewModel
 import org.example.project.screens.dashboard.DashboardScreen
 import org.example.project.screens.dashboard.DashboardViewModel
 import org.example.project.data.local.createUserDataStore
+import org.example.project.data.theme.AppColors
+import org.example.project.data.theme.AppTheme
 import org.example.project.screens.app.AppManagerDialogType
 import org.example.project.util.PlatformContext
 
@@ -77,7 +80,12 @@ fun App(
             }
         }
 
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(AppTheme.color.surfaceColor),
+            contentAlignment = Alignment.Center
+        ) {
             when (state.screenType) {
                 null -> Text("Loading…")
                 AppScreenType.LOGIN -> LoginScreen(viewModel = loginViewModel)
