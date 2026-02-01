@@ -1,29 +1,29 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Desktop (JVM).
+## TL;DR
+This is a very simple macOS application to solve a personal problem of managing my pending PRs and PRs assigned to me for review.
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+## Problem statement
+I keep multiple GitHub tabs open to:
+- Review PRs assigned to me
+- Monitor my own PRs for review feedback or approval status
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+This leads to:
+- Context switching
+- Tab clutter
+- Manual and repetitive checks
+- Missed updates (new comments, commits after review)
 
-### Build and Run Android Application
+## Solution - GitRadar
+A lightweight **macOS application** that aggregates GitHub activity into a single, action-focused dashboard.
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+The app presents only what matters:
+- What needs action
+- What is you caught up with
+- What is still a draft
+
+No noise, no replacement of GitHub—just a productivity layer on top.
+
+
+<img width="1006" height="689" alt="Screenshot 2026-02-01 at 8 05 26 PM" src="https://github.com/user-attachments/assets/18777b94-f9f8-4ec6-8344-6cd7a99b8fed" />
 
 ### Build and Run Desktop (JVM) Application
 
@@ -37,12 +37,3 @@ in your IDE’s toolbar or run it directly from the terminal:
   ```shell
   .\gradlew.bat :composeApp:run
   ```
-
-### Build and Run iOS Application
-
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
-
----
-
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
