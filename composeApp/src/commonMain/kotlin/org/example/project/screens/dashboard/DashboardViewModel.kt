@@ -14,6 +14,7 @@ import org.example.project.data.github.model.PullRequestResponseDocApiModel
 import org.example.project.data.pulls.PullRequestAppModel
 import org.example.project.data.pulls.PullRequestsManager
 import org.example.project.screens.base.SnackbarErrorMessage
+import kotlin.time.Clock
 import kotlin.time.Instant
 
 class DashboardViewModel(
@@ -150,7 +151,7 @@ class DashboardViewModel(
                     return@launch
                 }
                 PullRequestStatus.NEEDS_ATTENTION -> {
-                    val instant = Instant.parseOrNull(pr.updatedAt) ?: return@launch
+                    val instant = Clock.System.now()
                     val repo = localDataSource.observeLoggedInUser().firstOrNull()?.githubRepoRef ?: return@launch
                     localDataSource.markResolvedAt(
                         prId = pr.prId,
