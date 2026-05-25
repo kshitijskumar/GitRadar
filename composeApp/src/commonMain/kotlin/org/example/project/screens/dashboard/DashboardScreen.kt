@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.example.project.data.pulls.PullRequestStatus
 import org.example.project.data.theme.AppColors
 import org.example.project.data.theme.AppTheme
 

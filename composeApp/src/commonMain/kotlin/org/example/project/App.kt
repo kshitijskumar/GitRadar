@@ -15,23 +15,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import org.example.project.data.app.AppRemoteDataSource
-import org.example.project.data.app.AppRemoteDataSourceImpl
-import org.example.project.data.github.createGithubHttpClient
-import org.example.project.data.pulls.PullRequestsManager
-import org.example.project.screens.app.AppManagerViewModel
-import org.example.project.screens.app.AppScreenType
 import org.example.project.data.app.AppLocalDataSource
 import org.example.project.data.app.AppLocalDataSourceImpl
-import org.example.project.screens.login.LoginScreen
-import org.example.project.screens.login.LoginViewModel
-import org.example.project.screens.dashboard.DashboardScreen
-import org.example.project.screens.dashboard.DashboardViewModel
+import org.example.project.data.app.AppRemoteDataSource
+import org.example.project.data.app.AppRemoteDataSourceImpl
 import org.example.project.data.local.createUserDataStore
 import org.example.project.data.local.db.GitRadarDatabaseFactory
+import org.example.project.data.local.prefs.DataStoreCredentialStore
+import org.example.project.data.local.prefs.LoggedInUserStoreImpl
+import org.example.project.data.pulls.PullRequestsManager
 import org.example.project.data.theme.AppColors
 import org.example.project.data.theme.AppTheme
 import org.example.project.screens.app.AppManagerDialogType
+import org.example.project.screens.app.AppManagerViewModel
+import org.example.project.screens.app.AppScreenType
+import org.example.project.screens.dashboard.DashboardScreen
+import org.example.project.screens.dashboard.DashboardViewModel
+import org.example.project.screens.login.LoginScreen
+import org.example.project.screens.login.LoginViewModel
 import org.example.project.util.PlatformContext
 
 @Composable
@@ -40,17 +41,17 @@ fun App(
 ) {
     MaterialTheme {
         val database = remember(platformContext) { GitRadarDatabaseFactory.getGitRadarDatabase(platformContext) }
-        val localDataSource: AppLocalDataSource = remember(platformContext) {
+        val credentialStore = remember(platformContext) { DataStoreCredentialStore(createUserDataStore(platformContext)) }
+        val loggedInUserStore = remember(credentialStore) { LoggedInUserStoreImpl(credentialStore) }
+        val localDataSource: AppLocalDataSource = remember(loggedInUserStore, credentialStore, database) {
             AppLocalDataSourceImpl(
-                preferencesDataStore = createUserDataStore(platformContext),
+                loggedInUserStore = loggedInUserStore,
+                credentialStore = credentialStore,
                 database = database,
             )
         }
         val remoteDataSource: AppRemoteDataSource = remember(localDataSource) {
-            AppRemoteDataSourceImpl(
-                githubClient = createGithubHttpClient(),
-                localDataSource = localDataSource,
-            )
+            AppRemoteDataSourceImpl.create(localDataSource)
         }
         val pullRequestsManager = remember(localDataSource, remoteDataSource) {
             PullRequestsManager(
