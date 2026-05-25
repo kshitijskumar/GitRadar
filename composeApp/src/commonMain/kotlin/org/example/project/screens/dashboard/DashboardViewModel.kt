@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import org.example.project.data.app.AppLocalDataSource
 import org.example.project.data.github.model.PullRequestResponseDocApiModel
 import org.example.project.data.pulls.PullRequestAppModel
+import org.example.project.data.pulls.PullRequestStatus
 import org.example.project.data.pulls.PullRequestsManager
 import org.example.project.screens.base.SnackbarErrorMessage
 import kotlin.time.Clock
