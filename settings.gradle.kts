@@ -3,6 +3,8 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {
+        maven("https://cache-redirector.jetbrains.com/intellij-repository/releases")
+        maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
         google {
             mavenContent {
                 includeGroupAndSubgroups("androidx")
@@ -17,6 +19,8 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
+        maven("https://cache-redirector.jetbrains.com/intellij-repository/releases")
+        maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
         google {
             mavenContent {
                 includeGroupAndSubgroups("androidx")
@@ -34,3 +38,4 @@ plugins {
 
 include(":composeApp")
 include(":shared")
+include(":intellijPlugin")

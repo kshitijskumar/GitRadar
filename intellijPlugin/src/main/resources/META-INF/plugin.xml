@@ -1,0 +1,22 @@
+<idea-plugin>
+    <id>com.github.kshitijskumar.gitradar</id>
+    <name>GitRadar</name>
+    <vendor url="https://github.com/kshitijskumar/GitRadar">kshitijskumar</vendor>
+    <description><![CDATA[
+        GitHub PR review dashboard — see PRs you own under review and PRs assigned to you,
+        directly inside your IDE.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>Git4Idea</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow
+            id="GitRadar"
+            anchor="right"
+            secondary="false"
+            canCloseContents="false"
+            factoryClass="com.github.kshitijskumar.gitradar.toolwindow.GitRadarToolWindowFactory"
+            icon="/icons/gitradar_13.svg"/>
+    </extensions>
+</idea-plugin>
