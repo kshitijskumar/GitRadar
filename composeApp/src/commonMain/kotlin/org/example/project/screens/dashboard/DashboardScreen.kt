@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
 import org.example.project.data.pulls.PullRequestStatus
 import org.example.project.data.theme.AppColors
 import org.example.project.data.theme.AppTheme
@@ -269,6 +270,14 @@ private fun PullRequestStatus.showResolveOption(): Boolean {
         PullRequestStatus.DRAFT -> false
         PullRequestStatus.NEEDS_ATTENTION,
         PullRequestStatus.RESOLVED -> true
+    }
+}
+
+private fun PullRequestStatus.indicatorColor(): Color {
+    return when (this) {
+        PullRequestStatus.DRAFT -> AppTheme.color.draftIndicator
+        PullRequestStatus.NEEDS_ATTENTION -> AppTheme.color.actionRequiredIndicator
+        PullRequestStatus.RESOLVED -> AppTheme.color.caughtUpIndicator
     }
 }
 

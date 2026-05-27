@@ -36,6 +36,7 @@ kotlin {
             implementation(libs.ktor.serializationKotlinxJson)
             implementation(libs.sqldelight.runtime)
             implementation(libs.sqldelight.coroutines.exts)
+            implementation(libs.androidx.lifecycle.viewmodel)
         }
         jvmMain.dependencies {
             implementation(libs.ktor.cio)

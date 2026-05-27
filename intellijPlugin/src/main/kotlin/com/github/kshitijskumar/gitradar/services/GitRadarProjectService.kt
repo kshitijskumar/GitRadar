@@ -17,6 +17,7 @@ import org.example.project.data.app.AppRemoteDataSourceImpl
 import org.example.project.data.local.db.GitRadarDatabaseFactory
 import org.example.project.data.local.prefs.CredentialStore
 import org.example.project.data.pulls.PullRequestsManager
+import org.example.project.screens.dashboard.DashboardViewModel
 import org.example.project.util.PlatformContext
 
 @Service(Service.Level.PROJECT)
@@ -48,7 +49,13 @@ class GitRadarProjectService(project: Project) : Disposable {
         remoteDataSource = remoteDataSource,
     )
 
+    val dashboardViewModel = DashboardViewModel(
+        localDataSource = localDataSource,
+        pullRequestsManager = pullRequestsManager,
+    )
+
     override fun dispose() {
+        dashboardViewModel.resetViewModel()
         pullRequestsManager.clear()
         serviceScope.cancel()
     }
