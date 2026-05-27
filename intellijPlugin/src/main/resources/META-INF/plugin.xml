@@ -11,6 +11,18 @@
     <depends>Git4Idea</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <applicationService
+            serviceImplementation="com.github.kshitijskumar.gitradar.services.GitRadarApplicationService"/>
+
+        <projectService
+            serviceImplementation="com.github.kshitijskumar.gitradar.services.GitRadarProjectService"/>
+
+        <applicationConfigurable
+            parentId="tools"
+            instance="com.github.kshitijskumar.gitradar.settings.GitRadarAppSettingsConfigurable"
+            id="com.github.kshitijskumar.gitradar.settings"
+            displayName="GitRadar"/>
+
         <toolWindow
             id="GitRadar"
             anchor="right"
