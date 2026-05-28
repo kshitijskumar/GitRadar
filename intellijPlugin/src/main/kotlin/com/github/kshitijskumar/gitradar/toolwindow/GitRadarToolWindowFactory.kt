@@ -13,6 +13,7 @@ class GitRadarToolWindowFactory : ToolWindowFactory {
         val panel = DashboardPanel(
             project = project,
             viewModel = service.dashboardViewModel,
+            coroutineScope = service.serviceScope,
             accountFlow = appService.accountFlow,
             detectedRepoFlow = service.repoDetector.detectedRepo,
         )

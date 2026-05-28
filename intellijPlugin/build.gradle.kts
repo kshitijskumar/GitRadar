@@ -1,7 +1,5 @@
 plugins {
     kotlin("jvm")
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
     alias(libs.plugins.intellijPlatform)
 }
 
@@ -11,11 +9,6 @@ repositories {
             includeGroupAndSubgroups("androidx")
             includeGroupAndSubgroups("com.android")
             includeGroupAndSubgroups("com.google")
-        }
-    }
-    maven("https://packages.jetbrains.team/maven/p/kpm/public/") {
-        mavenContent {
-            includeGroupAndSubgroups("org.jetbrains.jewel")
         }
     }
     mavenCentral()
@@ -32,11 +25,7 @@ java {
 
 dependencies {
     implementation(projects.shared)
-    implementation(libs.jewel.ideBridge)
     implementation(libs.androidx.lifecycle.viewmodel)
-    implementation(compose.desktop.currentOs) {
-        exclude(group = "org.jetbrains.compose.material")
-    }
 
     intellijPlatform {
         intellijIdeaCommunity("2024.3")
