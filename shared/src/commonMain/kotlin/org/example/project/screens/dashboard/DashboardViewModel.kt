@@ -2,6 +2,7 @@ package org.example.project.screens.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +20,12 @@ import kotlin.time.Clock
 class DashboardViewModel(
     private val localDataSource: AppLocalDataSource,
     private val pullRequestsManager: PullRequestsManager,
+    externalScope: CoroutineScope? = null,
 ) : ViewModel() {
+
+    // Plugin passes serviceScope to avoid Dispatchers.Main conflict with IntelliJ's bundled coroutines.
+    // Android/Compose passes null, falling back to viewModelScope as normal.
+    private val scope: CoroutineScope = externalScope ?: viewModelScope
 
     private val _state = MutableStateFlow(DashboardState())
     val state: StateFlow<DashboardState> = _state.asStateFlow()
@@ -30,7 +36,7 @@ class DashboardViewModel(
         startPullRequestsCollectorsIfNeeded()
         fetchPullRequests()
 
-        viewModelScope.launch {
+        scope.launch {
             val user = localDataSource.observeLoggedInUser().firstOrNull()
             val repoRef = user?.githubRepoRef
             val username = user?.githubUsername
@@ -59,7 +65,7 @@ class DashboardViewModel(
     private fun startPullRequestsCollectorsIfNeeded() {
         if (pullRequestsCollectionJob != null) return
 
-        pullRequestsCollectionJob = viewModelScope.launch {
+        pullRequestsCollectionJob = scope.launch {
             launch {
                 pullRequestsManager.currentUsersPullRequests().collect { prs ->
                     _state.update {
@@ -96,7 +102,7 @@ class DashboardViewModel(
     private fun fetchPullRequests() {
         if (state.value.isPullRequestsLoading) return
 
-        viewModelScope.launch {
+        scope.launch {
             _state.update { it.copy(isPullRequestsLoading = true, errorMessage = null) }
             val error = pullRequestsManager.fetchPullRequests()
             _state.update {
@@ -124,7 +130,7 @@ class DashboardViewModel(
     fun handleLogoutConfirmed() {
         if (state.value.isLoading) return
 
-        viewModelScope.launch {
+        scope.launch {
             _state.update { it.copy(isLoading = true, dialogType = null, errorMessage = null) }
             runCatching { localDataSource.setLoggedInUser(null) }
                 .onSuccess {
@@ -142,7 +148,7 @@ class DashboardViewModel(
     }
 
     fun markUnmarkResolved(pr: DashboardPullRequestItem) {
-        viewModelScope.launch {
+        scope.launch {
             when (pr.status) {
                 PullRequestStatus.DRAFT -> {
                     return@launch

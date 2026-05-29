@@ -25,7 +25,7 @@ class GitRadarProjectService(project: Project) : Disposable {
 
     val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    val repoDetector = RepoDetector(project, this)
+    val repoDetector = RepoDetector(project, this, serviceScope)
 
     private val appService = GitRadarApplicationService.getInstance()
 
@@ -52,6 +52,7 @@ class GitRadarProjectService(project: Project) : Disposable {
     val dashboardViewModel = DashboardViewModel(
         localDataSource = localDataSource,
         pullRequestsManager = pullRequestsManager,
+        externalScope = serviceScope,
     )
 
     override fun dispose() {

@@ -1,9 +1,9 @@
 package com.github.kshitijskumar.gitradar.settings
 
 import com.github.kshitijskumar.gitradar.services.GitRadarApplicationService
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.options.SearchableConfigurable
-import kotlinx.coroutines.runBlocking
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Insets
@@ -15,6 +15,7 @@ import javax.swing.JTextField
 
 class GitRadarAppSettingsConfigurable : SearchableConfigurable {
 
+    private val log = Logger.getInstance(GitRadarAppSettingsConfigurable::class.java)
     private var panel: JPanel? = null
     private var usernameField: JTextField? = null
     private var patField: JPasswordField? = null
@@ -72,16 +73,18 @@ class GitRadarAppSettingsConfigurable : SearchableConfigurable {
         val username = usernameField?.text?.trim().orEmpty()
         val pat = String(patField?.password ?: CharArray(0)).trim()
 
+        log.info("[GitKshitij1] apply: username='$username' patBlank=${pat.isBlank()}")
+
         if (username.isBlank()) throw ConfigurationException("GitHub username must not be empty.")
         if (pat.isBlank()) throw ConfigurationException("Personal Access Token must not be empty.")
 
-        runBlocking {
-            GitRadarApplicationService.getInstance().saveAccount(username = username, pat = pat)
-        }
+        GitRadarApplicationService.getInstance().launchSaveAccount(username = username, pat = pat)
+        log.info("[GitKshitij1] apply: save launched")
     }
 
     override fun reset() {
         val creds = GitRadarApplicationService.getInstance().accountFlow.value
+        log.info("[GitKshitij1] reset: accountFlow.value=${if (creds == null) "null" else "present (username=${creds.username})"}")
         usernameField?.text = creds?.username.orEmpty()
         patField?.text = creds?.pat.orEmpty()
     }

@@ -4,10 +4,12 @@ import com.github.kshitijskumar.gitradar.credentials.PasswordSafeCredentialStore
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
+import com.intellij.openapi.diagnostic.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -24,20 +26,35 @@ class GitRadarApplicationService : Disposable {
         credentialStore.observe(KEY_PAT),
         credentialStore.observe(KEY_USERNAME),
     ) { pat, username ->
-        if (pat.isNullOrBlank() || username.isNullOrBlank()) null
+        val result = if (pat.isNullOrBlank() || username.isNullOrBlank()) null
         else AccountCredentials(username = username, pat = pat)
+        log.info("[GitKshitij1] accountFlow combine: patBlank=${pat.isNullOrBlank()} usernameBlank=${username.isNullOrBlank()} -> ${if (result == null) "null" else "AccountCredentials(username=${result.username})"}")
+        result
     }.stateIn(
         scope = serviceScope,
         started = SharingStarted.Eagerly,
         initialValue = null,
     )
 
+    fun launchSaveAccount(username: String, pat: String) {
+        log.info("[GitKshitij1] launchSaveAccount: queuing save for username='$username'")
+        serviceScope.launch {
+            log.info("[GitKshitij1] saveAccount: start")
+            credentialStore.put(KEY_PAT, pat)
+            credentialStore.put(KEY_USERNAME, username)
+            log.info("[GitKshitij1] saveAccount: done")
+        }
+    }
+
     suspend fun saveAccount(username: String, pat: String) {
+        log.info("[GitKshitij1] saveAccount: start username='$username'")
         credentialStore.put(KEY_PAT, pat)
         credentialStore.put(KEY_USERNAME, username)
+        log.info("[GitKshitij1] saveAccount: done")
     }
 
     suspend fun clearAccount() {
+        log.info("[GitKshitij1] clearAccount")
         credentialStore.remove(KEY_PAT)
         credentialStore.remove(KEY_USERNAME)
     }
@@ -51,6 +68,8 @@ class GitRadarApplicationService : Disposable {
     companion object {
         private const val KEY_PAT = "github-pat"
         private const val KEY_USERNAME = "github-username"
+
+        private val log = Logger.getInstance(GitRadarApplicationService::class.java)
 
         fun getInstance(): GitRadarApplicationService =
             ApplicationManager.getApplication().getService(GitRadarApplicationService::class.java)
