@@ -2,6 +2,7 @@ package org.example.project.screens.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,18 +11,21 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.project.data.app.AppLocalDataSource
-import org.example.project.data.github.model.PullRequestResponseDocApiModel
 import org.example.project.data.pulls.PullRequestAppModel
 import org.example.project.data.pulls.PullRequestStatus
 import org.example.project.data.pulls.PullRequestsManager
 import org.example.project.screens.base.SnackbarErrorMessage
 import kotlin.time.Clock
-import kotlin.time.Instant
 
 class DashboardViewModel(
     private val localDataSource: AppLocalDataSource,
     private val pullRequestsManager: PullRequestsManager,
+    externalScope: CoroutineScope? = null,
 ) : ViewModel() {
+
+    // Plugin passes serviceScope to avoid Dispatchers.Main conflict with IntelliJ's bundled coroutines.
+    // Android/Compose passes null, falling back to viewModelScope as normal.
+    private val scope: CoroutineScope = externalScope ?: viewModelScope
 
     private val _state = MutableStateFlow(DashboardState())
     val state: StateFlow<DashboardState> = _state.asStateFlow()
@@ -32,7 +36,7 @@ class DashboardViewModel(
         startPullRequestsCollectorsIfNeeded()
         fetchPullRequests()
 
-        viewModelScope.launch {
+        scope.launch {
             val user = localDataSource.observeLoggedInUser().firstOrNull()
             val repoRef = user?.githubRepoRef
             val username = user?.githubUsername
@@ -54,7 +58,6 @@ class DashboardViewModel(
     }
 
     fun handleRefreshClicked() {
-        // UI should disable the button, but keep a guard here too.
         if (state.value.isPullRequestsLoading) return
         fetchPullRequests()
     }
@@ -62,7 +65,7 @@ class DashboardViewModel(
     private fun startPullRequestsCollectorsIfNeeded() {
         if (pullRequestsCollectionJob != null) return
 
-        pullRequestsCollectionJob = viewModelScope.launch {
+        pullRequestsCollectionJob = scope.launch {
             launch {
                 pullRequestsManager.currentUsersPullRequests().collect { prs ->
                     _state.update {
@@ -99,7 +102,7 @@ class DashboardViewModel(
     private fun fetchPullRequests() {
         if (state.value.isPullRequestsLoading) return
 
-        viewModelScope.launch {
+        scope.launch {
             _state.update { it.copy(isPullRequestsLoading = true, errorMessage = null) }
             val error = pullRequestsManager.fetchPullRequests()
             _state.update {
@@ -127,7 +130,7 @@ class DashboardViewModel(
     fun handleLogoutConfirmed() {
         if (state.value.isLoading) return
 
-        viewModelScope.launch {
+        scope.launch {
             _state.update { it.copy(isLoading = true, dialogType = null, errorMessage = null) }
             runCatching { localDataSource.setLoggedInUser(null) }
                 .onSuccess {
@@ -145,10 +148,9 @@ class DashboardViewModel(
     }
 
     fun markUnmarkResolved(pr: DashboardPullRequestItem) {
-        viewModelScope.launch {
-            when(pr.status) {
+        scope.launch {
+            when (pr.status) {
                 PullRequestStatus.DRAFT -> {
-                    // no concept of resolved/unresolved from drafts
                     return@launch
                 }
                 PullRequestStatus.NEEDS_ATTENTION -> {
@@ -174,9 +176,4 @@ class DashboardViewModel(
         _state.update { DashboardState() }
         pullRequestsManager.clear()
     }
-
-    companion object {
-        private const val MINUTES_5_IN_MILLIS = 5 * 60 * 1000
-    }
 }
-

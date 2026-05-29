@@ -4,6 +4,13 @@ plugins {
 }
 
 repositories {
+    google {
+        mavenContent {
+            includeGroupAndSubgroups("androidx")
+            includeGroupAndSubgroups("com.android")
+            includeGroupAndSubgroups("com.google")
+        }
+    }
     mavenCentral()
     intellijPlatform {
         defaultRepositories()
@@ -18,14 +25,13 @@ java {
 
 dependencies {
     implementation(projects.shared)
+    implementation(libs.androidx.lifecycle.viewmodel)
 
     intellijPlatform {
-        local("/Applications/Android Studio.app")
+        intellijIdeaCommunity("2024.3")
         bundledPlugin("Git4Idea")
         pluginVerifier()
     }
-
-
 }
 
 intellijPlatform {

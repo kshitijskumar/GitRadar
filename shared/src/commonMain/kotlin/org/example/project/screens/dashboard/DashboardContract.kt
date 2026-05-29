@@ -1,8 +1,6 @@
 package org.example.project.screens.dashboard
 
-import androidx.compose.ui.graphics.Color
 import org.example.project.data.pulls.PullRequestStatus
-import org.example.project.data.theme.AppTheme
 import org.example.project.screens.base.SnackbarErrorMessage
 
 data class DashboardState(
@@ -22,16 +20,8 @@ enum class DashboardTab {
     PR_REVIEWS,
 }
 
-fun PullRequestStatus.indicatorColor(): Color {
-    return when (this) {
-        PullRequestStatus.DRAFT -> AppTheme.color.draftIndicator
-        PullRequestStatus.NEEDS_ATTENTION -> AppTheme.color.actionRequiredIndicator
-        PullRequestStatus.RESOLVED -> AppTheme.color.caughtUpIndicator
-    }
-}
-
 fun DashboardTab.tabName(): String {
-    return when(this) {
+    return when (this) {
         DashboardTab.MY_PRS -> "My PRs"
         DashboardTab.PR_REVIEWS -> "PR Reviews"
     }
@@ -49,4 +39,3 @@ data class DashboardPullRequestItem(
 sealed class DashboardDialogType {
     data object LogoutConfirmationDialog : DashboardDialogType()
 }
-
